@@ -61,36 +61,44 @@ jobs:
         working-directory: apps/mobile
         run: npm install -g eas-cli@latest
       
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-      
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      
-      - name: Build with EAS locally
+      - name: Build with EAS (cloud)
         working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: |
           if [ "${{ github.event.inputs.profile }}" = "production" ]; then
-            eas build -p android --profile production --local
+            eas build -p android --profile production --non-interactive
           else
-            eas build -p android --profile preview --local
+            eas build -p android --profile preview --non-interactive
           fi
       
-      - name: Find and move APK
+      - name: Wait for build and download
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: |
-          APK_PATH=$(find apps/mobile/android -name "*.apk" -o -name "*.aab" | head -1)
-          if [ -z "$APK_PATH" ]; then
-            echo "No APK found, listing build outputs:"
-            find apps/mobile/android -type f
-            exit 1
-          fi
-          echo "APK_PATH=$APK_PATH" >> $GITHUB_OUTPUT
-          mv "$APK_PATH" build.apk
-          echo "Build artifact: build.apk"
-        id: find-apk
+          echo "Waiting for build to complete..."
+          sleep 30
+          BUILD_ID=$(eas build:list --limit=1 --json | jq -r '.[0].id')
+          echo "Build ID: $BUILD_ID"
+          
+          # Wait for build to complete
+          while true; do
+            STATUS=$(eas build:view $BUILD_ID --json | jq -r '.status')
+            echo "Build status: $STATUS"
+            if [ "$STATUS" = "finished" ]; then
+              break
+            elif [ "$STATUS" = "errored" ] || [ "$STATUS" = "canceled" ]; then
+              echo "Build failed with status: $STATUS"
+              exit 1
+            fi
+            sleep 30
+          done
+          
+          # Download the APK
+          eas build:download $BUILD_ID
+          mv *.apk ../build.apk 2>/dev/null || mv *.aab ../build.apk
+        id: download-build
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
