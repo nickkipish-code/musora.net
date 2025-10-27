@@ -72,18 +72,18 @@ jobs:
           key: ${{ runner.os }}-expo-${{ hashFiles('apps/mobile/**') }}
       
       - name: Setup Expo and prebuild
+        working-directory: apps/mobile
         run: |
-          npm i -g eas-cli@latest
-          cd apps/mobile
-          npx expo prebuild --no-install --clean
+          npm i -g @expo/cli@latest
+          npx expo prebuild --clean --platform android
       
       - name: Make Gradle wrapper executable
-        run: chmod +x apps/mobile/android/gradlew
+        working-directory: apps/mobile/android
+        run: chmod +x gradlew
       
       - name: Build APK
-        run: |
-          cd apps/mobile/android
-          ./gradlew bundleRelease
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease
       
       - name: Find APK
         id: find-apk
