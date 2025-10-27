@@ -34,7 +34,7 @@ log_next.txt
 Thumbs.db
 
 # Lock files (keep pnpm-lock in root)
-pnpm-lock.yaml
+# pnpm-lock.yaml
 
 # Expo
 .expo
