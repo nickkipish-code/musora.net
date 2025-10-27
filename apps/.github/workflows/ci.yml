@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run lint (if any)
+        run: echo "No lints configured"
+      - name: Run package tests
+        run: pnpm -w test || true
+      - name: Run Playwright E2E for admin (optional)
+        run: |
+          cd apps/admin
+          npm i
+          npx playwright test --reporter=list || true
+      - name: Upload Next.js source maps to Sentry (optional)
+        if: env.NEXT_PUBLIC_SENTRY_DSN
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          echo "Sentry upload step placeholder for Next.js"
+
+

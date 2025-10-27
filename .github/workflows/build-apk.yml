@@ -1,0 +1,125 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Build profile (preview or production)'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Cache Expo dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            apps/mobile/.expo
+            apps/mobile/node_modules
+          key: ${{ runner.os }}-expo-${{ hashFiles('apps/mobile/**') }}
+      
+      - name: Setup Expo and prebuild
+        run: |
+          npm i -g eas-cli@latest
+          cd apps/mobile
+          npx expo prebuild --no-install --clean
+      
+      - name: Make Gradle wrapper executable
+        run: chmod +x apps/mobile/android/gradlew
+      
+      - name: Build APK
+        run: |
+          cd apps/mobile/android
+          ./gradlew bundleRelease
+      
+      - name: Find APK
+        id: find-apk
+        run: |
+          APK_PATH=$(find apps/mobile/android -name "*.apk" | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found, listing build outputs:"
+            find apps/mobile/android -type f -name "*.apk" -o -name "*.aab"
+            exit 1
+          fi
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "APK found at: $APK_PATH"
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-apk
+          path: ${{ steps.find-apk.outputs.APK_PATH }}
+          retention-days: 7
+      
+      - name: Create Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.find-apk.outputs.APK_PATH }}
+          tag_name: apk-${{ github.run_number }}
+          name: Android APK Build #${{ github.run_number }}
+          body: |
+            ## Android APK Build
+            
+            **Profile:** ${{ github.event.inputs.profile || 'preview' }}
+            **Commit:** ${{ github.sha }}
+            **Branch:** ${{ github.ref }}
+            
+            Скачайте APK из Artifacts или из Release.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

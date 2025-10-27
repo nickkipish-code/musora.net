@@ -1,0 +1,73 @@
+Remaining high-level tasks (short list):
+
+- Harden server security: rate limiting, CORS, helmet
+- Implement RBAC and admin JWT guards
+- Complete payments integration (Stripe/Monobank real)
+- Google Maps address autocomplete integration
+
+Progress:
+- Payments: Stripe Checkout session creation implemented (requires STRIPE_SECRET_KEY env)
+Progress:
+- Payments: Stripe Checkout session creation implemented (requires STRIPE_SECRET_KEY env)
+- Maps: Address autocomplete added in mobile as `AddressSearchScreen` (needs `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`)
+
+Next up:
+- Full CI deployment with secrets configured
+- Sentry sourcemap uploads and release tagging automation
+
+Progress:
+- CI secrets validation workflow added to allow manual check of required secrets
+- JWT middleware added to attach `user` payload to express requests; RolesGuard can use it
+
+Next up:
+- Perform test deploys with secrets configured
+
+Progress:
+- Stripe webhook handler added (`stripe-webhook` endpoint) and simplified `handleStripeEvent` to process completed sessions
+
+Next up:
+- Monitor webhook flows and handle refunds reconciliation
+
+Progress:
+- Transactions endpoint and admin TransactionsPanel added for monitoring
+- Reconcile script created at `scripts/reconcile-transactions.ts` (placeholder)
+
+Next up:
+- Run reconcile script in CI or schedule as cron job
+
+Progress:
+- Reconcile script added and scheduled via `apps/.github/workflows/reconcile.yml` to run nightly
+
+Next up:
+- Configure Sentry alerts and integrate with team channels
+
+Progress:
+- Sentry: deploy workflow updated to run `sentry-cli` and placeholder steps for mobile sourcemaps (requires secrets)
+
+Next up:
+- Full CI deployment with secrets configured (see `DEPLOY.md` for required secrets)
+Progress:
+- CI deploy: Render deploy curl step added to workflow; EAS build configured to run with EAS_TOKEN
+
+Next up:
+- Ensure Vercel and EAS tokens are set in repository secrets and perform a test deploy
+- Full CI deployment with secrets configured
+- Sentry sourcemap uploads and release tagging automation
+- Accessibility and UI polish
+- E2E tests expansion and device QA
+
+Progress:
+- Server security: Helmet/CORS/rate-limiting added and applied
+
+Next actions:
+- RBAC: Registered `RolesGuard` globally and applied `Roles('admin')` to sensitive endpoints
+- Auth: Ensure login/register return role and JWT payload includes role when present
+- RBAC: Roles decorator and RolesGuard added; UsersController created; Auth returns role on login/register
+
+Next up (short list):
+- Complete payments integration (Stripe/Monobank real)
+- Google Maps address autocomplete integration
+
+Will append updates here after each completed step.
+
+

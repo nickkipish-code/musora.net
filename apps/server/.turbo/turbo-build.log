@@ -1,0 +1,7 @@
+
+> @museum/server@0.1.0 build C:\Users\Katren\Documents\project\app_android\apps\server
+> nest build
+
+'nest' is not recognized as an internal or external command,
+operable program or batch file.
+ ELIFECYCLE  Command failed with exit code 1.

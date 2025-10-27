@@ -1,0 +1,15 @@
+:root{
+  --bg: #0A0A0A;
+  --surface: #111111;
+  --text: #F3F3F3;
+  --primary: #D4AF37;
+}
+html,body,#root{height:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter, system-ui, -apple-system, Roboto;margin:0}
+main{max-width:1200px;margin:0 auto}
+card{display:block}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,0.4);margin-bottom:12px}
+
+
+
+

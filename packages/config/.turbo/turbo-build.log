@@ -1,0 +1,4 @@
+
+> @museum/config@0.1.0 build C:\Users\Katren\Documents\project\app_android\packages\config
+> tsc -p tsconfig.build.json
+

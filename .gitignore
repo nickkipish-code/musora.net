@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.expo
+coverage
+/.turbo
+pnpm-lock.yaml
+/.next
+/.DS_Store
+
+

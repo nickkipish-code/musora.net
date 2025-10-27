@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  name          String?
+  passwordHash  String?
+  phone         String?
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
+  tickets       SupportTicket[]
+  subscriptions Subscription[]
+  loyaltyPoints Int          @default(0) // for bonus system (10 orders = 1 free)
+  bonusOrders   Int          @default(0) // free orders earned
+  pushToken     String?
+  role          UserRole     @default(CLIENT)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum UserRole {
+  CLIENT
+  COURIER
+  ADMIN
+}
+
+model Courier {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id])
+  rating       Float     @default(5.0)
+  vehicle      String?
+  verified     Boolean   @default(false)
+  lastLat      Float?
+  lastLng      Float?
+  lastLocation DateTime?
+  orders       Order[]
+  payouts      Payout[]
+  reviews      Review[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Address {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  label     String?
+  street    String
+  city      String
+  lat       Float
+  lng       Float
+  floor     Int
+  intercom  String?
+  comment   String?
+  orders    Order[]
+  createdAt DateTime  @default(now())
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  courier     Courier?    @relation(fields: [courierId], references: [id])
+  courierId   String?
+  address     Address     @relation(fields: [addressId], references: [id])
+  addressId   String
+  type        OrderType
+  floor       Int
+  bagsCount   Int         @default(1)  // number of bags/packages
+  pickupTime  String?     // IMMEDIATE, AFTERNOON, EVENING, TOMORROW_MORNING
+  accessType  String?     // ELEVATOR, STAIRS, PRIVATE_HOUSE
+  doorCode    String?     // door code for access
+  slotTime    DateTime?   // requested time slot
+  photos      String[]    @default([])
+  photosAfter String[]    @default([]) // courier's "after" photos
+  status      OrderStatus @default(PENDING)
+  price       Int
+  commission  Int
+  payout      Int?
+  promoId     String?
+  promo       PromoCode?  @relation(fields: [promoId], references: [id])
+  comment     String?
+  lat         Float
+  lng         Float
+  timeline    Json?
+  review      Review?
+  transaction Transaction?
+  subscription Subscription? // for recurring orders
+  subscriptionId String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+enum OrderType {
+  STANDARD
+  RECYCLABLE
+  BULKY
+}
+
+enum OrderStatus {
+  PENDING
+  ASSIGNED
+  EN_ROUTE
+  ARRIVED
+  DONE
+  CANCELED
+  ACCEPTED // courier accepted the order
+}
+
+model Zone {
+  id       String   @id @default(cuid())
+  name     String
+  polygon  Json     // array of {lat, lng}
+  city     String
+  tariff   Tariff?  @relation("ZoneTariff")
+  createdAt DateTime @default(now())
+}
+
+model Tariff {
+  id        String @id @default(cuid())
+  zoneId    String @unique
+  zone      Zone   @relation("ZoneTariff", fields: [zoneId], references: [id])
+  basePrice Int
+  perFloor  Int
+}
+
+model PromoCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  amount    Int      // fixed discount in cents
+  percentage Int?    // percentage discount (optional)
+  expiresAt DateTime?
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  courier   Courier? @relation(fields: [courierId], references: [id])
+  courierId String?
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Payout {
+  id        String   @id @default(cuid())
+  courier   Courier  @relation(fields: [courierId], references: [id])
+  courierId String
+  amount    Int
+  status    String   @default("PENDING") // PENDING, PROCESSED, FAILED
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  amount    Int
+  status    String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id          String     @id @default(cuid())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String
+  name        String     // "5 выносов в месяц"
+  planType    String     // DAILY, EVERY_3_DAYS, WEEKLY, MONTHLY
+  price       Int
+  ordersLimit Int        // how many orders included
+  ordersUsed  Int        @default(0)
+  startDate   DateTime   @default(now())
+  endDate     DateTime?
+  isActive    Boolean    @default(true)
+  orders      Order[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model SupportTicket {
+  id        String       @id @default(cuid())
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String
+  subject   String
+  status    String       @default("OPEN") // OPEN, RESOLVED, CLOSED
+  messages  ChatMessage[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model ChatMessage {
+  id        String         @id @default(cuid())
+  ticket    SupportTicket  @relation(fields: [ticketId], references: [id])
+  ticketId  String
+  userId    String
+  body      String
+  createdAt DateTime       @default(now())
+}
+
+

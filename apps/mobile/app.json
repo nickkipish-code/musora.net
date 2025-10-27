@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "мусора.нет",
+    "slug": "musora-net",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "sdkVersion": "51.0.0",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0A0A"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.musora.delivery"
+    },
+    "android": {
+      "package": "com.musora.delivery",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Приложению требуется доступ к геолокации для определения адреса доставки."
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "http://192.168.0.101:4000",
+      "eas": {
+        "projectId": "344a8816-26a3-442a-8ae2-34548c1a0c0d"
+      }
+    },
+    "eas": {
+      "projectId": "344a8816-26a3-442a-8ae2-34548c1a0c0d"
+    },
+    "owner": "kipish"
+  }
+}

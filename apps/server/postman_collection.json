@@ -1,0 +1,73 @@
+{
+  "info": {
+    "name": "Museum Delivery API",
+    "_postman_id": "museum-delivery",
+    "description": "Basic collection for local testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"test@example.com\",\"password\":\"pass\"}" },
+        "url": { "raw": "http://localhost:4000/auth/register", "host": [ "http://localhost:4000" ], "path": [ "auth", "register" ] }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"email\":\"test@example.com\"}" },
+        "url": { "raw": "http://localhost:4000/auth/login", "host": [ "http://localhost:4000" ], "path": [ "auth", "login" ] }
+      }
+    },
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "raw", "raw": "{\"userId\":\"<userId>\",\"addressId\":\"<addressId>\",\"type\":\"STANDARD\",\"floor\":3,\"lat\":50.45,\"lng\":30.52,\"price\":200}" },
+        "url": { "raw": "http://localhost:4000/orders", "host": [ "http://localhost:4000" ], "path": [ "orders" ] }
+      }
+    },
+    {
+      "name": "Nearby Orders",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:4000/orders/nearby?lat=50.45&lng=30.52", "host": [ "http://localhost:4000" ], "path": [ "orders", "nearby" ], "query": [{ "key": "lat", "value": "50.45" }, { "key": "lng", "value": "30.52" }] }
+      }
+    },
+    {
+      "name": "Create Payment Link",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"orderId\":\"<orderId>\",\"amount\":200}" },
+        "url": { "raw": "http://localhost:4000/payments/create", "host": [ "http://localhost:4000" ], "path": [ "payments", "create" ] }
+      }
+    },
+    {
+      "name": "Simulate Webhook",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"orderId\":\"<orderId>\",\"status\":\"CONFIRMED\",\"amount\":200}" },
+        "url": { "raw": "http://localhost:4000/payments/webhook", "host": [ "http://localhost:4000" ], "path": [ "payments", "webhook" ] }
+      }
+    },
+    {
+      "name": "Update Order Status",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+        "body": { "mode": "raw", "raw": "{\"status\":\"EN_ROUTE\"}" },
+        "url": { "raw": "http://localhost:4000/orders/<id>/status", "host": [ "http://localhost:4000" ], "path": [ "orders", "<id>", "status" ] }
+      }
+    }
+  ]
+}
+
+

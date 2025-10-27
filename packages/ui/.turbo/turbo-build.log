@@ -1,0 +1,4 @@
+
+> @museum/ui@0.1.0 build C:\Users\Katren\Documents\project\app_android\packages\ui
+> tsc -p tsconfig.build.json
+

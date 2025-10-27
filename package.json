@@ -1,0 +1,22 @@
+{
+  "name": "museum-delivery",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@8.6.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "db:migrate": "pnpm -w --filter @museum/db prisma migrate dev",
+    "seed": "pnpm -w --filter @museum/db ts-node -O '{\"module\":\"commonjs\"}' packages/db/src/seed.ts",
+    "changelog": "sh scripts/generate-changelog.sh",
+    "release:tag": "node -e \"const fs=require('fs'); const v=JSON.parse(fs.readFileSync('package.json','utf8')).version; require('child_process').execSync('git tag -a v'+v+' -m \\\"Release v'+v+'\\\" && git push origin v'+v, {stdio: 'inherit'});\"",
+    "release:prepare": "pnpm changelog && echo 'Run release:tag to push tag'"
+  },
+  "devDependencies": {
+    "turbo": "^1.11.2",
+    "typescript": "^5.1.6",
+    "pnpm": "^8.6.0"
+  }
+}
+
+

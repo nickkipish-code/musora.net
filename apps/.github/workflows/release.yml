@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate changelog
+        run: pnpm changelog || true
+      - name: Create GitHub Release (attach CHANGELOG)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=${GITHUB_REF##*/}
+          body=$(cat CHANGELOG.md || echo "")
+          gh release create $tag -F CHANGELOG.md || echo "gh release failed; create manually"
+
+

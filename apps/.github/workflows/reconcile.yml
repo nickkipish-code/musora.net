@@ -1,0 +1,22 @@
+name: Reconcile Transactions
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # daily at 02:00 UTC
+  workflow_dispatch:
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Run reconcile script
+        run: node scripts/reconcile-transactions.ts
+
+

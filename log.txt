@@ -1,0 +1,114 @@
+2025-10-26 10:00 - Initialize monorepo
+  - Added pnpm workspace, turbo.json, package.json, .gitignore, README
+
+2025-10-26 10:10 - Create packages
+  - Added packages/config (env, i18n), packages/ui (tokens, Button), packages/db (Prisma schema, seed)
+
+2025-10-26 10:30 - Prisma schema & seed
+  - Created Prisma schema models and initial seed scripts (packages/db)
+
+2025-10-26 11:00 - Scaffold server (NestJS)
+  - Added apps/server with AppModule, PrismaModule, Auth, Users, Orders modules and Swagger
+
+2025-10-26 11:30 - Payments & Webhook
+  - Implemented payments controller/service with Monobank mock, Stripe placeholder, webhook handler
+
+2025-10-26 12:00 - Admin (Next.js)
+  - Scaffolded apps/admin (App Router), global styles, Tailwind theme, Orders pages and API proxy
+
+2025-10-26 12:30 - Mobile (Expo)
+  - Scaffolded apps/mobile with navigation, GoldCard, CreateOrder/Payment/CourierMode screens, app.json and eas.json
+
+2025-10-26 13:00 - Integrations & CI
+  - Added CI templates (ci.yml, deploy.yml), Postman collection, TESTS.md, QA checklist
+
+2025-10-26 13:30 - Monitoring & Sentry
+  - Added Sentry server init, client placeholders for admin and mobile, CI placeholders for sourcemap upload
+
+2025-10-26 14:00 - UI polish & i18n
+  - Added admin Header, global layout, Button components (web + native), updated GoldCard to use tokens, added basic i18n helper
+
+2025-10-26 14:30 - Release automation
+  - Added changelog script, RELEASE_CHECKLIST, release workflows and helper scripts for tagging and changelog generation
+
+2025-10-26 14:45 - Tests
+  - Added Vitest unit test for tokens and Playwright e2e test for admin; CI runs tests
+
+2025-10-26 15:00 - Auth hardening
+  - Added `passwordHash` to User model and `RefreshToken` model in Prisma
+  - Implemented hashed passwords (bcrypt) and refresh token creation/refresh endpoint in AuthService
+
+2025-10-26 15:20 - File uploads
+  - Implemented `uploads` controller: accepts base64 order photo, saves to `apps/server/uploads` and attaches path to `order.photos`
+  - Added admin moderation placeholder in orders page
+
+2025-10-26 15:40 - Supabase upload & moderation UI
+  - Added `UploadsService` with local save fallback and `UploadsController` attempts Supabase storage when `SUPABASE_URL`/`SUPABASE_KEY` provided
+  - Added admin `ModerationPanel` to review order photos with Approve/Reject placeholders
+
+2025-10-26 16:10 - Server security
+  - Added Helmet, CORS configuration and basic rate-limiting middleware applied in `main.ts`
+
+2025-10-26 16:30 - RBAC
+  - Added `Roles` decorator and `RolesGuard` applied globally
+  - Extended AuthService to return role with login/register
+  - Added basic UsersController to expose user info
+
+2025-10-26 16:55 - Payments integration
+  - Added Stripe dependency and implemented Checkout session creation in PaymentsService
+  - PaymentsController routes now call Stripe session creator; webhook note updated
+
+2025-10-26 17:10 - Maps integration (mobile)
+  - Added `AddressSearchScreen` for Expo mobile using Google Places Autocomplete (requires `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`)
+
+2025-10-26 17:30 - Sentry upload automation
+  - Added placeholder steps in deploy workflow to upload Next.js source maps via `sentry-cli` (requires `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`)
+  - Added placeholder note for mobile sourcemap uploads (sentry-expo / eas integration)
+
+2025-10-26 17:55 - CI secrets docs
+  - Added CI Secrets Checklist to `DEPLOY.md` listing required tokens for Vercel/Render/EAS/Sentry/Stripe/Supabase
+
+2025-10-26 18:10 - CI deploy automation
+  - Added Render deploy curl step to deploy workflow using `RENDER_API_KEY` and `RENDER_SERVICE_ID`
+  - Ensured EAS build step remains placeholder for mobile builds
+
+2025-10-26 19:00 - CI secrets validation
+  - Added `validate-secrets` workflow to check presence of required repo secrets via manual dispatch
+
+2025-10-26 19:25 - JWT middleware
+  - Added `jwtMiddleware` to parse Authorization header and attach `user` to express request for RolesGuard usage
+
+2025-10-26 20:05 - RBAC enforcement
+  - Registered `RolesGuard` globally in `main.ts` and applied `@Roles('admin')` to `UsersController.getUser`
+  - Added global validation pipe in `main.ts`
+
+2025-10-26 20:40 - Build fixes
+  - Added missing `tsconfig.build.json` to `packages/ui` and `packages/config`
+  - Adjusted `apps/admin` Tailwind version to `^4.1.16` for registry compatibility
+  - Added postinstall step for `apps/server` to ensure `@nestjs/cli` availability in environments without global install
+
+2025-10-26 19:45 - Accessibility improvements
+  - Added ARIA labels and roles to admin `Header` and navigation
+  - Added `scope` attributes in orders table headers and data-labels for better screen reader support
+  - Added `accessibilityLabel` to mobile form inputs
+  - Registered middleware in `main.ts` so RolesGuard can read `req.user`
+
+2025-10-26 18:40 - Payments refunds
+  - Implemented Stripe refund creation in PaymentsService and admin refund UI calls `/api/payments/refund`
+
+2025-10-26 20:30 - Stripe webhook handler
+  - Added simplified `stripe-webhook` endpoint and `handleStripeEvent` in PaymentsService to process `checkout.session.completed` events
+
+2025-10-26 21:10 - Webhook monitoring & transactions
+  - Added `transactions` endpoint for admin to view recent transactions
+  - Added `TransactionsPanel` in admin orders page to list transactions
+  - Added `scripts/reconcile-transactions.ts` placeholder script to reconcile transactions with external providers
+
+2025-10-26 21:40 - Reconcile CI job
+  - Added scheduled GitHub Action `reconcile.yml` to run `scripts/reconcile-transactions.ts` nightly
+  - Added suggested Sentry alert rules to `DEPLOY.md`
+
+Notes:
+  - Future steps will be appended here as brief lines describing each change.
+
+

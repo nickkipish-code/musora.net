@@ -1,0 +1,22 @@
+{
+  "name": "@museum/admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "next": "15.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "^4.1.16"
+  },
+  "devDependencies":{
+    "@playwright/test":"^1.37.0"
+  }
+}
+
+
