@@ -53,7 +53,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
       
       - name: Setup pnpm cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -64,7 +64,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       
       - name: Cache Expo dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             apps/mobile/.expo
@@ -98,7 +98,7 @@ jobs:
           echo "APK found at: $APK_PATH"
       
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: ${{ steps.find-apk.outputs.APK_PATH }}
