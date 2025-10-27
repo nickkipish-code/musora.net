@@ -32,19 +32,13 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-      
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
+      
+      - name: Install pnpm globally
+        run: npm install -g pnpm@8
       
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -63,52 +57,48 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Cache Expo dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            apps/mobile/.expo
-            apps/mobile/node_modules
-          key: ${{ runner.os }}-expo-${{ hashFiles('apps/mobile/**') }}
-      
-      - name: Setup Expo and prebuild
+      - name: Setup Expo
         working-directory: apps/mobile
+        run: npm install -g eas-cli@latest
+      
+      - name: Login to EAS
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas login --non-interactive --token $EXPO_TOKEN
+      
+      - name: Build with EAS
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: |
-          npm i -g @expo/cli@latest
-          npx expo prebuild --clean --platform android
-      
-      - name: Make Gradle wrapper executable
-        working-directory: apps/mobile/android
-        run: chmod +x gradlew
-      
-      - name: Build APK
-        working-directory: apps/mobile/android
-        run: ./gradlew assembleRelease
-      
-      - name: Find APK
-        id: find-apk
-        run: |
-          APK_PATH=$(find apps/mobile/android -name "*.apk" | head -1)
-          if [ -z "$APK_PATH" ]; then
-            echo "No APK found, listing build outputs:"
-            find apps/mobile/android -type f -name "*.apk" -o -name "*.aab"
-            exit 1
+          if [ "${{ github.event.inputs.profile }}" = "production" ]; then
+            eas build -p android --profile production --non-interactive --output apk
+          else
+            eas build -p android --profile preview --non-interactive --output apk
           fi
-          echo "APK_PATH=$APK_PATH" >> $GITHUB_OUTPUT
-          echo "APK found at: $APK_PATH"
+      
+      - name: Download build
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: |
+          BUILD_ID=$(eas build:list --limit=1 --json | jq -r '.[0].id')
+          eas build:download --latest --output ./build.apk
+          mv build.apk ../../
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: ${{ steps.find-apk.outputs.APK_PATH }}
+          path: build.apk
           retention-days: 7
       
       - name: Create Release
         if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ steps.find-apk.outputs.APK_PATH }}
+          files: build.apk
           tag_name: apk-${{ github.run_number }}
           name: Android APK Build #${{ github.run_number }}
           body: |
