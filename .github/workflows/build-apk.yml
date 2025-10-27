@@ -57,35 +57,40 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Setup Expo
+      - name: Setup Expo and EAS
         working-directory: apps/mobile
         run: npm install -g eas-cli@latest
       
-      - name: Login to EAS
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
-        run: eas login --non-interactive --token $EXPO_TOKEN
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
       
-      - name: Build with EAS
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Build with EAS locally
         working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: |
           if [ "${{ github.event.inputs.profile }}" = "production" ]; then
-            eas build -p android --profile production --non-interactive --output apk
+            eas build -p android --profile production --local
           else
-            eas build -p android --profile preview --non-interactive --output apk
+            eas build -p android --profile preview --local
           fi
       
-      - name: Download build
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+      - name: Find and move APK
         run: |
-          BUILD_ID=$(eas build:list --limit=1 --json | jq -r '.[0].id')
-          eas build:download --latest --output ./build.apk
-          mv build.apk ../../
+          APK_PATH=$(find apps/mobile/android -name "*.apk" -o -name "*.aab" | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found, listing build outputs:"
+            find apps/mobile/android -type f
+            exit 1
+          fi
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_OUTPUT
+          mv "$APK_PATH" build.apk
+          echo "Build artifact: build.apk"
+        id: find-apk
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
