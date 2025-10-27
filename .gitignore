@@ -1,11 +1,50 @@
+# Dependencies
 node_modules
-dist
-.env
-.expo
+.pnp
+.pnp.js
+
+# Testing
 coverage
-/.turbo
-pnpm-lock.yaml
+
+# Build output
+dist
+.turbo
 /.next
-/.DS_Store
+/out
+build
+
+# Logs
+*.log
+log.txt
+log_next.txt
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files (keep pnpm-lock in root)
+pnpm-lock.yaml
+
+# Expo
+.expo
+web-build
+
+# Turbo logs
+.turbo/*.log
+
+# Package manager files
+package-lock.json
+yarn.lock
 
 
